@@ -1,5 +1,6 @@
 import glob
 import json
+import os
 
 import requests
 from termcolor import colored
@@ -12,7 +13,13 @@ create_api_key_body = {
 print(colored('create new admin key', 'green'))
 ret = requests.post("http://admin:mamboserver@grafana:3000/api/auth/keys", data=create_api_key_body)
 data = ret.json()
+INFLUXDB_PORT = os.environ.get("INFLUXDB_PORT", "")
+INFLUXDB_SERVER = os.environ.get("INFLUXDB_SERVER", "")
+INFLUXDB_NAME = os.environ.get("INFLUXDB_NAME", "")
+INFLUXDB_USERNAME = os.environ.get("INFLUXDB_USERNAME", "")
+INFLUXDB_PASSWORD = os.environ.get("INFLUXDB_PASSWORD", "")
 
+print(colored(INFLUXDB_PORT, 'red'))
 key = data.get("key", "")
 print(colored('admin key %s' % key, 'blue'))
 
@@ -55,18 +62,19 @@ data_sources = [
 	{
 		"name": "influxdb",
 		"type": "influxdb",
-		"url": "http://9.181.211.124:30233",
+		"url": "http://%s:%s" % (INFLUXDB_SERVER, INFLUXDB_PORT),
 		"access": "proxy",
 		"basicAuth": False,
-		"user": "hightall",
-		"password": "mamboserver",
-		"database": "video_insight"
+		"user": INFLUXDB_USERNAME,
+		"password": INFLUXDB_PASSWORD,
+		"database": INFLUXDB_NAME
 	}
 ]
 
 for item in data_sources:
-	ret = requests.post("http://grafana:3000/api/datasources", headers=headers,
-						data=json.dumps(item))
+	ret = requests.post(
+		"http://grafana:3000/api/datasources", headers=headers,
+		data=json.dumps(item))
 	print(colored('create data source %s %s' % (item.get("name"), ret.json()), 'blue'))
 
 # Create alert notification
