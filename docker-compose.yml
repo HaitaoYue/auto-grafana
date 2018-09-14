@@ -1,0 +1,20 @@
+version: '2'
+
+services:
+  grafana:
+    image: hightall/grafana-ppc64le
+    volumes:
+      - ./grafana:/var/lib/grafana
+    ports:
+      - 3000:3000
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=mamboserver
+  create-api-key:
+    build:
+      context: ./create-api-key
+    links:
+      - grafana
+    volumes:
+      - $ROOT_PATH/.makerc/deploy:/makefile/deploy
+      - $ROOT_PATH/dashboard:/dashboard
+    command: bash -c "holdup -t 300 tcp://grafana:3000 && python init.py"

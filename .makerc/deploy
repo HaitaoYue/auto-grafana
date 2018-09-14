@@ -1,0 +1,136 @@
+ifneq ($(DEV), True)
+	DEBUG?=False
+else
+	DEBUG?=True
+endif
+WEBROOT?=/video-insight
+ELASTIC_SEARCH_ROOT?=/elasticsearch
+KIBANA_ROOT?=/kibana
+GRAFANA_ROOT?=/grafana
+SERVICE_PORT?=80
+INITIAL_SETTINGS?=True
+DEPLOY_METHOD?=compose
+MONGO_HOST?=mongo
+MONGO_USER?=
+MONGO_PASSWORD?=
+MONGO_DB_PATH?=${PWD}/mongo
+ELASTICSEARCH_DB_PATH?=${PWD}/elasticsearch-db
+KIBANA_CONFIG_PATH?=${PWD}/config/kibana
+PROMETHEUS_CONFIG_FILE?=${PWD}/config/prometheus/prometheus.yml
+PROMETHEUS_CONFIG_PATH?=${PWD}/config/prometheus
+PROMETHEUS_DATA_PATH?=${PWD}/data/prometheus
+INFLUXDB_PATH?=${PWD}/data/influxdb
+INFLUXDB_NAME?=video_insight
+INFLUXDB_USERNAME?=hightall
+INFLUXDB_PASSWORD?=mamboserver
+GRAFANA_CONFIG_PATH?=${PWD}/config/grafana/defaults.ini
+GRAFANA_PATH?=${PWD}/data/grafana
+K8S_HOST?=9.186.106.206:8080
+K8S_NAMESPACE?=video-insight
+STREAM_PROXY?=ws://
+STREAM_HTTP_PROXY?=http://
+INTERNAL_HTTP_PROXY?=http://
+STREAM_PROXY_PREFIX?=/video_stream
+STREAM_API_PREFIX?=/video_stream/api
+UWSGI_SERVER_HOST:=uwsgi-server
+K8S_DB_SECRET_NAME?=
+K8S_DEPLOY_NAMESPACE?=video-stream-manager
+START_METHOD:=start-compose
+STOP_METHOD:=stop-compose
+IMAGE_PULL_SECRET?=
+CODE_PATH:=${PWD}/src
+PLUGIN_STORE_PATH?=${PWD}/data/plugins
+LOG_STORE_PATH?=${PWD}/data/log
+STREAM_MEDIA_STORE_PATH?=${PWD}/data/stream_media
+RABBITMQ_PATH?=${PWD}/data/rabbitmq
+ELASTICSEARCH_HOST?=
+RABBITMQ_DEFAULT_PASS?=mamboserver
+RABBITMQ_DEFAULT_USER?=hightall
+RABBITMQ_DEFAULT_VHOST?=stream
+RABBITMQ_SERVER?=rabbitmq-server
+RAABITMQ_NODE_PORT?=32001
+RABBITMQ_PUBLIC_HOST?=
+SERVER_URL?=
+
+export TOKEN_INFO_URL?=https://crl.ptopenlab.com:8800/keycloak/auth/realms/aivision/protocol/openid-connect/userinfo
+export ADMIN_TOKEN?=$(shell cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+export ADMIN_NAME?=admin
+
+ifeq ($(DEPLOY_METHOD), k8s)
+	MONGO_HOST:=localhost
+	UWSGI_SERVER_HOST:=localhost
+	START_METHOD:=start-k8s
+	STOP_METHOD:=stop-k8s
+	RABBITMQ_SERVER:=localhost
+endif
+
+ifeq ($(DEV), True)
+	ifeq ($(IMAGE_PULL_SECRET), )
+		DEPLOY_TEMPLATE:=deploy-dev.tmpl
+	else
+		DEPLOY_TEMPLATE:=deploy-dev-private.tmpl
+	endif
+else
+	ifeq ($(IMAGE_PULL_SECRET), )
+		DEPLOY_TEMPLATE:=deploy.tmpl
+	else
+		DEPLOY_TEMPLATE:=deploy-private.tmpl
+	endif
+endif
+
+export INITIAL_SETTINGS
+export DEBUG
+export WEBROOT
+export SERVICE_PORT
+export MONGO_HOST
+export MONGO_USER
+export MONGO_PASSWORD
+export MONGO_DB_PATH
+export K8S_HOST
+export K8S_NAMESPACE
+export STREAM_PROXY
+export STREAM_HTTP_PROXY
+export STREAM_PROXY_PREFIX
+export STREAM_API_PREFIX
+export MONGO_DB_PATH
+export K8S_DB_SECRET_NAME
+export UWSGI_SERVER_HOST
+export DEPLOY_TEMPLATE
+export K8S_DEPLOY_NAMESPACE
+export ELASTICSEARCH_DB_PATH
+export ELASTIC_SEARCH_ROOT
+export KIBANA_CONFIG_PATH
+export KIBANA_ROOT
+export CODE_PATH
+export PLUGIN_STORE_PATH
+export STREAM_MEDIA_STORE_PATH
+export ELASTICSEARCH_HOST
+export RABBITMQ_DEFAULT_PASS
+export RABBITMQ_DEFAULT_USER
+export RABBITMQ_DEFAULT_VHOST
+export BROKER_URL:=amqp://$(RABBITMQ_DEFAULT_USER):$(RABBITMQ_DEFAULT_PASS)@$(RABBITMQ_SERVER):5672/$(RABBITMQ_DEFAULT_VHOST)
+export CELERY_RESULT_BACKEND:=amqp://$(RABBITMQ_DEFAULT_USER):$(RABBITMQ_DEFAULT_PASS)@$(RABBITMQ_SERVER):5672/$(RABBITMQ_DEFAULT_VHOST)
+export RABBITMQ_PATH
+export SERVER_URL
+export RAABITMQ_NODE_PORT
+export RABBITMQ_PUBLIC_HOST
+export INTERNAL_HTTP_PROXY
+export PROMETHEUS_CONFIG_PATH
+export PROMETHEUS_CONFIG_FILE
+export PROMETHEUS_DATA_PATH
+export GRAFANA_PATH
+export GRAFANA_CONFIG_PATH
+export GRAFANA_ROOT
+export INFLUXDB_PATH
+export INFLUXDB_HOST?=127.0.0.1
+export INFLUXDB_NAME
+export INFLUXDB_USERNAME
+export INFLUXDB_PASSWORD
+export MONITOR_DOMAIN_NAME?=prometheus-hk.com
+export GRAFANA_API_KEY?=eyJrIjoieFRqbkZjQ2pnVVkzVWI5QjN6aFF5MDRoZjdMRDhZQkUiLCJuIjoiYWRtaW4ta2V5IiwiaWQiOjF9
+export GRAFANA_FOLDER_ID?=1
+export INFLUXDB_NODE_PORT?=32101
+export MYSQL_ROOT_PASSWORD?=mamboserver
+export MYSQL_HOST?=127.0.0.1
+export MYSQL_DATABASE?=video_insight
+export MYSQL_DB_PATH?={PWD}/data/mariadb
